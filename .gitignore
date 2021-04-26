@@ -1,0 +1,12 @@
+.DS_Store
+.idea/
+*.iml
+*.log
+.ipynb_checkpoints/
+*.pem
+
+.gradle
+build
+
+data
+data_new
