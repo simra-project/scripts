@@ -10,3 +10,10 @@ build
 
 data
 data_new
+
+out/
+*.iws
+
+log/
+target/*
+*.class
