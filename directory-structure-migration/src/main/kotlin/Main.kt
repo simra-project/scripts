@@ -1,6 +1,5 @@
 import com.xenomachina.argparser.ArgParser
 import com.xenomachina.argparser.mainBody
-import de.hasenburg.broker.simulation.main.Conf
 import me.tongfei.progressbar.ProgressBar
 import org.apache.logging.log4j.LogManager
 import java.io.File
@@ -21,7 +20,7 @@ fun main(args: Array<String>) {
 
 fun getRideFiles(regionDir: File): List<File> {
     return regionDir.walk().toList()
-        .filter { it.absolutePath.contains("Rides/VM") }
+        .filter { it.absolutePath.contains("Rides/VM") || it.absolutePath.contains("Rides${File.separator}VM") }
 }
 
 fun createFileTargetMapping(rideFiles: List<File>): Map<File, String> {

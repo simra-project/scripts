@@ -9,7 +9,7 @@ class Ride(val originalFile: File) {
 
     init {
         check(originalFile.exists()) { "Ride file ${originalFile.absolutePath} does not exist" }
-        check(originalFile.absolutePath.split("/Rides/")[1].split("/").size == 1) {
+        check(originalFile.absolutePath.split("${File.separator}Rides${File.separator}")[1].split(File.separator).size == 1) {
             "Ride file ${originalFile.absolutePath} seems not to be located wihtin the old directory structure."
         }
     }
@@ -24,8 +24,8 @@ class Ride(val originalFile: File) {
     }
 
     fun getTargetFilePath(): String {
-        val split = originalFile.absolutePath.split("/Rides/")
-        return "${split[0]}/Rides/${date.year}/${date.month.twoDigits()}/${split[1]}"
+        val split = originalFile.absolutePath.split("${File.separator}Rides${File.separator}")
+        return "${split[0]}${File.separator}Rides${File.separator}${date.year}${File.separator}${date.month.twoDigits()}${File.separator}${split[1]}"
     }
 
     fun Month.twoDigits(): String {
