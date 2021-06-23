@@ -116,11 +116,8 @@ public class Main {
                 int index = 0;
                 while ((line = bufferedReader.readLine()) != null) {
                     if (!line.startsWith(",,")) {
-                        // logger.debug("simRaRideFile: " + simRaRideFile + " line:" + line);
                         String[] location = Arrays.copyOfRange(line.split(","),0,2);
                         if (isInBoundingBox(boundingBox, location)) {
-                            logger.debug("location " + Arrays.toString(location) + " is in bounding box " + boundingBox);
-                            logger.debug("index: " + index + " frames.size(): " + frames.size());
                             if(index > frames.size()-1) {
                                 frames.ensureCapacity(index);
                                 for (int j = frames.size(); j < index; j++) {
@@ -135,10 +132,9 @@ public class Main {
                                 frames.set(index,oldFrame);
                             }
                         }
+                        index++;
                     }
-                    index++;
                 }
-
 
             } catch (IOException e) {
                 e.printStackTrace();
@@ -208,7 +204,7 @@ public class Main {
             Files.deleteIfExists(outputFile.toPath());
             Files.write(outputFile.toPath(), sb.toString().getBytes(),
                     StandardOpenOption.CREATE_NEW);
-            logger.info("File written at: " + outputFile.getAbsolutePath() + ".txt");
+            logger.info("File written at: " + outputFile.getAbsolutePath());
         } catch (IOException e) {
             e.printStackTrace();
         }
