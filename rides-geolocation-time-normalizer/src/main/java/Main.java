@@ -4,42 +4,35 @@ import org.apache.logging.log4j.Logger;
 import java.io.*;
 import java.nio.file.Files;
 import java.nio.file.StandardOpenOption;
+import java.nio.file.attribute.BasicFileAttributes;
 import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Objects;
 
 import static org.apache.logging.log4j.LogManager.getLogger;
 
+/**
+ * Creates a text file at --outputDir used for visualization purposes.
+ *
+ * The resulting text file contains lines with at least one gps location as a latitude, longitude pair.
+ * Each pair represents a location of a SimRa user during a ride, where the first line contains the locations of all
+ * included rides' first location. The second line, the second location of all rides etc.
+ *
+ * This can be used, for example, to create visualization where the locations of each line are projected on a map
+ * one by one by a couple of seconds.
+ *
+ * See CommandLineArguments' help texts for further information on how to filter the rides to be included by region or date
+ */
 public class Main {
     static Logger logger = getLogger();
 
-    public static void main(String ... argv) {
-        logger.info("This is an info message");
-        logger.debug("This is a debug message");
-        logger.error("This is an error message");
-        String[] location = {"52.453974", "9.76966756"};
-        String boundingBox = "9.751493,52.447388,9.775541,52.456624";
-        boolean isInBoundingBox = isInBoundingBox(boundingBox,location);
-        logger.info("location " + Arrays.toString(location) + " is in bounding box " + boundingBox + ": " + isInBoundingBox);
-    }
-
     public static void doGPSMapper(CommandLineArguments cla) {
-
-        File file = cla.getSimraRoot();
 
         File[] regionFolders = getRelevantRegionFolders(cla.getSimraRoot(), cla.getRegions());
 
-        logger.info("regionFolders: " + Arrays.toString(regionFolders));
-
         File[] simRaRides = getRideFiles(regionFolders);
 
-        logger.info("simRaRides size: " + simRaRides.length);
-
-        // logger.info("simRaRides: " + Arrays.toString(simRaRides));
-
-        ArrayList<ArrayList<String[]>> frameLines = calculateFrames(cla.getBoundingBox(), simRaRides);
-
-        logger.info("frameLines size: " + frameLines.size());
+        ArrayList<ArrayList<String[]>> frameLines = calculateFrames(cla.getBoundingBox(), cla.getFromDate(), cla.getToDate(), simRaRides);
 
         writeFrames(frameLines, cla.getOutputDir(), cla.getRegions());
     }
@@ -100,11 +93,20 @@ public class Main {
      * @param simRaRides SimRa ride files
      * @return
      */
-    private static ArrayList<ArrayList<String[]>> calculateFrames(String boundingBox, File[] simRaRides) {
+    private static ArrayList<ArrayList<String[]>> calculateFrames(String boundingBox, String fromDate, String toDate, File[] simRaRides) {
         ArrayList<ArrayList<String[]>> frames = new ArrayList<>();
         for (int i = 0; i < simRaRides.length; i++) {
             File simRaRideFile = simRaRides[i];
-
+            long lastModifiedTime;
+            try {
+                lastModifiedTime = Files.readAttributes(simRaRideFile.toPath(), BasicFileAttributes.class).lastModifiedTime().toMillis();
+            } catch (IOException e) {
+                e.printStackTrace();
+                continue;
+            }
+            if (lastModifiedTime < Long.parseLong(fromDate) || lastModifiedTime > Long.parseLong(toDate)) {
+                continue;
+            }
             try (BufferedReader bufferedReader = new BufferedReader(new FileReader(simRaRideFile))) {
                 String line;
                 // skip to the data log part
@@ -192,9 +194,7 @@ public class Main {
                 String prefix = "";
                 for (int j = 0; j < thisFrame.size(); j++) {
                     sb.append(prefix).append(thisFrame.get(j)[0]).append(",").append(thisFrame.get(j)[1]);
-                    // logger.debug(Arrays.toString(thisFrame.get(j)));
-                    // sb.append(Arrays.toString(thisFrame.get(j)).replaceAll(", ",",").replaceAll(" ",",").replaceAll("\\[","").replaceAll("]",""));
-                prefix = ",";
+                    prefix = ",";
                 }
                 sb.append("\r\n");
             }

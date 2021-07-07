@@ -31,6 +31,14 @@ class CommandLineArguments(parser: ArgParser) {
         .storing("-r", "--regions", help = "regions where to search for rides that suit the bounding box. You can state multiple regions by simply separating them with commas, e.g., \" Berlin,UNKNOWN\". If you want all regions put \"all\" or don't use this option.")
         .default("all")
 
+    val fromDate by parser
+        .storing("-f", "--from", help = "timestamp in ms (epoch) as a lower boundary for the ride dates")
+        .default("0")
+
+    val toDate by parser
+        .storing("-t", "--to", help = "timestamp in ms (epoch) as an upper boundary for the ride dates")
+        .default(Long.MAX_VALUE.toString());
+
 
     val boundingBox by parser
         .storing("-b", "--boundingBox", help = "Bounding box as {west,south,east,north} as longitude,latitude,longitude,latitude values, e.g, 13.021,52.3772,13.8081,52.6513 for Berlin")
@@ -41,7 +49,7 @@ class CommandLineArguments(parser: ArgParser) {
      ****************************************************************/
 
     override fun toString(): String {
-        return "CommandLineArguments(simraRoot=$simraRoot, outputDir='$outputDir', boundingBox ='$boundingBox', regions ='$regions')"
+        return "CommandLineArguments(simraRoot=$simraRoot, outputDir='$outputDir', boundingBox ='$boundingBox', regions ='$regions', fromDate = '$fromDate', toDate = '$toDate')"
     }
 
 }
