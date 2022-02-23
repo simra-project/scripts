@@ -65,8 +65,7 @@ class Conf(parser: ArgParser) {
         return "Configuration: source files (${simraRoot.absolutePath}), output directory (${outputDir.absolutePath}), region ($region))"
     }
 
-    val osmMetaFile = File(osmDataDir).listFiles()!!.filter { it.name.lowercase().startsWith("${region.toString().lowercase()}_meta") }.first()
-
+    val osmMetaFile = File(osmDataDir).listFiles()!!.filter { it.name.lowercase().startsWith("${region.toString().lowercase()}_meta") }.last()
     init {
         require(osmMetaFile.exists()) { "${osmMetaFile.absolutePath} does not exist" }
     }
@@ -115,10 +114,13 @@ class Conf(parser: ArgParser) {
         val inputStream: InputStream = File(regionList).inputStream() // read the file
         inputStream.bufferedReader().useLines { lines -> lines.forEach { line ->
             if (!line.startsWith("#") && !line.startsWith("Please Choose") && !line.startsWith("!")) {
-                val regionShort = line.split("=")[2]
-                if (regionShort == region) {
-                    return line.split("=")[1]
+                val regionShort = line.split("=")[2].lowercase()
+                if (region is File) {
+                    if (regionShort == (region as File).name.lowercase()) {
+                        return line.split("=")[1]
+                    }
                 }
+
             }
         } }
         return region.toString()

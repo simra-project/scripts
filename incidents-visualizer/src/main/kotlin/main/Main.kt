@@ -32,7 +32,7 @@ fun main(args: Array<String>) {
     val incidentsInfo: MutableList<String> = mutableListOf()
     logger.info("creating " + cla.outputDir.absolutePath +  File.separator + cla.region + "-incidents.json and " + cla.outputDir.absolutePath +  File.separator + cla.region + "-incidents.html")
     File(cla.simraRoot.toURI()).walk().maxDepth(1).forEach { it ->
-        if(cla.region.toString() == it.name.lowercase() || (cla.region.toString() == "all" && !it.name.endsWith(".zip") && !it.name.contains("_")) && !it.name.equals("Regions")) {
+        if(cla.region.toString().lowercase() == it.name.lowercase() || (cla.region.toString() == "all" && !it.name.endsWith(".zip") && !it.name.contains("_")) && !it.name.equals("Regions")) {
             File(it.toURI()).walk().forEach { path ->
                 if(path.isFile && path.toString().contains("Rides") && path.name.startsWith("VM2_")) {
                     val thisIncidentsInfo: MutableList<String> = getIncidents(path.absolutePath)
