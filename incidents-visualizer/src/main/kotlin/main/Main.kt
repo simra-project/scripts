@@ -179,7 +179,8 @@ fun getIncidents(path: String): MutableList<String> {
  * Retrieves the correct timestamp of old manually added incidents, which had 1337 as timestamp
  */
 fun correctTimeStamp(thisIncident: String, path: String): String {
-    val parser = CSVParserBuilder().withSeparator(',').withQuoteChar('\"').build()
+    val parser = CSVParserBuilder().withSeparator(',').withIgnoreQuotations(true).build()
+    // val csvReader = CSVReaderBuilder(StringReader(thisIncident.replace("“","\""))).withSkipLines(0).withCSVParser(parser).build()
     val csvReader = CSVReaderBuilder(StringReader(thisIncident)).withSkipLines(0).withCSVParser(parser).build()
 
     val elements: MutableList<String> = csvReader.readNext().toList().toMutableList()
