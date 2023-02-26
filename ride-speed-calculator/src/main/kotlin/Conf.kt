@@ -5,15 +5,24 @@ import java.io.File
 
 class CommandLineArguments(parser: ArgParser) {
 
-    val ride by parser
-        .storing("-r", "--ride", help = "path to the ride csv") { File(this) }
-        .default(File("ride.csv"))
+    val simraRoot by parser
+        .storing("-s", "--simraRoot", help = "path to source files") { File(this) }
+        .default(File("../data/"))
         .addValidator {
             if (!value.exists()) {
                 throw InvalidArgumentException("${value.absolutePath} does not exist")
             }
-            if (!value.isFile) {
-                throw InvalidArgumentException("${value.absolutePath} is not a file")
+            if (!value.isDirectory) {
+                throw InvalidArgumentException("${value.absolutePath} is not a directory")
+            }
+        }
+
+    val region by parser
+        .storing("-r","--region", help = "which region incidents to visualize") { File(this) }
+        .default("all")
+        .addValidator {
+            require(value == "all" || (simraRoot.listFiles()!!.toList().map { it.nameWithoutExtension.lowercase() }.contains(value.toString().lowercase()))) {
+                "SimRa root folder ${simraRoot.absolutePath} does not contain region $value"
             }
         }
 
@@ -31,7 +40,7 @@ class CommandLineArguments(parser: ArgParser) {
      ****************************************************************/
 
     override fun toString(): String {
-        return "CommandLineArguments(ride='$ride', outputDir='$outputDir')"
+        return "CommandLineArguments(simraRoot='$simraRoot', region='$region', outputDir='$outputDir')"
     }
 
 }

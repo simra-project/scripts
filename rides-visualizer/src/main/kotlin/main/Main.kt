@@ -10,11 +10,9 @@ import org.geojson.FeatureCollection
 import org.geojson.LineString
 import org.geojson.LngLatAlt
 import org.jsoup.Jsoup
-import org.jsoup.nodes.Document
 import java.io.File
 import java.io.InputStream
 import java.nio.file.Paths
-import kotlin.system.exitProcess
 
 private val logger = LogManager.getLogger()
 
@@ -27,8 +25,18 @@ fun main(args: Array<String>) {
         if(cla.region.toString() == it.name) {
             File(it.toURI()).walk().forEach { path ->
                 if(path.isFile && path.toString().contains("Rides") && path.name.startsWith("VM2_")) {
-                    val rideInfo: MutableList<String> = getGPSPoints(path.absolutePath)
-                    ridesInfo[path.name] = rideInfo
+                    var bboxList: ArrayList<Double>? = null
+                    if (cla.bbox != "0.0,0.0,0.0,0.0") {
+                        bboxList = ArrayList()
+                        cla.bbox.split(",").forEach { it ->
+                            bboxList.add(it.toDouble())
+                        }
+                    }
+
+                    val rideInfo: MutableList<String>? = getGPSPoints(path.absolutePath, bboxList)
+                    if (rideInfo != null) {
+                        ridesInfo[path.name] = rideInfo
+                    }
                 }
             }
         }
@@ -67,27 +75,35 @@ fun printGeoJson(rideInfos: MutableMap<String, MutableList<String>>, outputDir: 
 }
 
 /**
- * Traverses a given ride and returns a List of GPS and timestamps (lat,lon,ts)
+ * Traverses a given ride and returns a List of GPS and timestamps (lat,lon,ts) or null, if given bbox is not null and
+ * ride does not go through bbox
  * @param path - The absolute path to the ride file
+ * @param bbox - (optional) if given, checks if the ride goes through the bbox.
  * @return gps and timestamp of given ride
  */
-fun getGPSPoints(path: String): MutableList<String> {
-    val result: MutableList<String> = mutableListOf() // contains the result
+fun getGPSPoints(path: String, bbox: ArrayList<Double>?): MutableList<String>? {
+    var result: MutableList<String>? = mutableListOf() // contains the result
     val inputStream: InputStream = File(path).inputStream() // read the file
     var ridePart = false // set to true after the ride header "lat,lon,X,Y,Z" is passed
+    var goesThroughBBox = false // set to true if ride goes through the bbox if given any
     // iterate through the ride file
     inputStream.bufferedReader().useLines { lines -> lines.forEach {
         // if ride part is reached...
         if (ridePart) {
             // split the array by comma
-            var lineArray = it.split(",")
+            val lineArray = it.split(",")
             // and if the line is a gps line, add lat, lon and ts to result
             if(lineArray[0].isNotEmpty()) {
                 val lat = lineArray[0]
                 val lon = lineArray[1]
                 val ts = lineArray[5]
                 // println("$lat,$lon,$ts")
-                result.add(("$lat,$lon,$ts"))
+                result?.add(("$lat,$lon,$ts"))
+                if (bbox != null) {
+                    if (inBoundingBox(bbox[0],bbox[1],bbox[2],bbox[3],lat.toDouble(),lon.toDouble())) {
+                        goesThroughBBox = true
+                    }
+                }
             }
         }
         // set ridePart to true, if header "lat,lon,X,Y,Z" is reached
@@ -95,5 +111,14 @@ fun getGPSPoints(path: String): MutableList<String> {
             ridePart = true
         }
     } }
+    if (bbox != null && !goesThroughBBox) {
+        result = null
+    }
     return result
+}
+
+fun inBoundingBox(blLat: Double, blLon: Double, trLat: Double, trLon:Double, pLat:Double, pLon:Double): Boolean {
+    // in case longitude 180 is inside the box
+
+    return pLat in blLat..trLat && pLon in blLon..trLon
 }
