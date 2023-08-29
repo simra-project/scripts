@@ -135,74 +135,10 @@ fun printGeoJson(incidents: MutableList<String>, rides: MutableMap<String, Mutab
             geometry = lineString
             properties = propertiesMap as Map<String, Any>?
         })
-        /*val elements: List<String>
-
-        if (rideLine.contains(",\"") && rideLine.contains("\",")) {
-            val parser = CSVParserBuilder().withSeparator(',').withQuoteChar('\"').build()
-            val csvReader = CSVReaderBuilder(StringReader(rideLine)).withSkipLines(0).withCSVParser(parser).build()
-            elements = csvReader.readNext().toList()
-            incidentsAsCsv += rideLine + "\n"
-        } else {
-            elements = rideLine.split(",")
-            val cleanedIncidentLine = rideLine
-            incidentsAsCsv += (cleanedIncidentLine + "\n")
-        }
-
-        val point = LineString()
-        val propertiesMap = mutableMapOf<String,String>()
-        val sdf = SimpleDateFormat("dd/MM/yyyy HH:mm:ss")
-        val timestamp = if (elements[2].isNotEmpty()) sdf.format((Date((elements[2]).toLong()))) else 0
-        val bikeType = if (elements[3].isNotEmpty()) bikeTypes[elements[3].toInt()] else "-"
-        val childCheckBox = if (elements[4] == "1") "Ja" else "Nein"
-        val trailerCheckBox = if (elements[5] == "1") "Ja" else "Nein"
-        val pLoc = if (elements[6].isNotEmpty()) phoneLocations[elements[6].toInt()] else phoneLocations[0]
-        val incident = if (elements[7].isNotEmpty()) incidentTypes[elements[7].toInt()] else incidentTypes[0]
-        var prefix = ""
-        var participantsText = "";
-        elements.subList(8,17).forEachIndexed() { index, participant ->
-            if (participant.isNotEmpty() && participant.toInt() == 1) {
-                participantsText += prefix
-                participantsText += participants[index]
-                prefix = ", "
-            }
-        }
-        val scary = if (elements[17] == "1") "Ja" else "Nein"
-        val desc = elements[18].replace(";komma;",",").replace(";linebreak;","\\n")
-
-        participantsText += if (elements[19] == "1") (prefix + participants[9]) else ""
-
-        val thisRegion = if (elements.size > 20) {
-            elements[20]
-        } else {
-            elements[19]
-        }
-
-        val rideName = if (elements.size > 21) {
-            elements[21]
-        } else {
-            elements[20]
-        }
-
-        propertiesMap["date"] = timestamp.toString()
-        propertiesMap["bikeType"] = bikeType
-        propertiesMap["child"] = childCheckBox
-        propertiesMap["trailer"] = trailerCheckBox
-        propertiesMap["pLoc"] = pLoc
-        propertiesMap["incident"] = incident
-        propertiesMap["participant"] = participantsText
-        propertiesMap["scary"] = scary
-        propertiesMap["descr"] = desc
-        propertiesMap["region"] = thisRegion
-        propertiesMap["ride"] = rideName
-
-        featureCollection.add(Feature().apply {
-            geometry = point
-            properties = propertiesMap as Map<String, Any>?
-        })*/
     }
     val pathToOutputHtml = outputDir.absolutePath +  File.separator + region + ".html"
     val htmlContent = StringBuilder()
-    val html = object {}.javaClass.getResource("/Template.html")?.readText()?.split("\n")
+    val html = object {}.javaClass.getResource("/Template.html")?.readText()?.split("\r\n")
     html?.forEach { line ->
         if (line != "const ridesUrl = null;") {
             htmlContent.appendLine(line)
