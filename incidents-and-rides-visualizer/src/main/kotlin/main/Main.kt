@@ -17,7 +17,7 @@ import java.util.*
  * Generates an html file containing a leaflet map with the rides and incidents of the specified region
  */
 private val logger = LogManager.getLogger()
-private val bikeTypes = arrayOf("-","City-/Trekking Bike","Road Racing Bike","E-Bike","Liegerad","Lastenrad","Tandembike","Mountainbik","Sonstiges")
+private val bikeTypes = arrayOf("-","City-/Trekking Bike","Road Racing Bike","E-Bike","Liegerad","Lastenrad","Tandembike","Mountainbike","Sonstiges")
 private val phoneLocations = arrayOf("Hosentasche","Lenker","Jackentasche","Hand","Fahrradkorb","Rucksack/Tasche","Sonstiges")
 private val incidentTypes = arrayOf("Nichts","Zu dichtes Überholen","Ein- oder ausparkendes Fahrzeug","Beinahe-Abbiegeunfall","Entgegenkommender Verkehrsteilnehmer","Zu dichtes Auffahren","Beinahe-Dooring","Hindernis ausweichen (z.B. Hund)","Sonstiges")
 private val participants = arrayOf("Bus","Fahrrad","Fußgänger","Lieferwagen","LKW","Motorrad","PKW","Taxi","Sonstiges","E-Scooter")
