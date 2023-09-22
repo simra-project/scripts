@@ -9,13 +9,15 @@ import java.nio.file.Paths
 import java.time.Instant
 import java.time.LocalDate
 import java.time.ZoneId
+import java.time.format.TextStyle
 import java.util.*
+import kotlin.system.exitProcess
 
 private val bikeTypes = arrayOf("-","City-/Trekking Bike","Road Racing Bike","E-Bike","Liegerad","Lastenrad","Tandembike","Mountainbike","Sonstiges")
 
 fun main(args: Array<String>) {
     val cla = mainBody { ArgParser(args).parseInto(::CommandLineArguments) }
-    var incidentsAsCsv = "Aufzeichnungsdatum,Aufzeichnungsuhrzeit,Fahrtlänge,Fahrtdauer,Fahrradtyp,Kindertransport,Anzahl der Beinaheunfälle,davon beängstigend\n"
+    var incidentsAsCsv = "Aufzeichnungsdatum,Wochentag,Aufzeichnungsuhrzeit,Fahrtlänge,Fahrtdauer,Fahrradtyp,Kindertransport,Anzahl der Beinaheunfälle,davon beängstigend\n"
     File(cla.simraRoot.toURI()).walk().maxDepth(1).forEach { it ->
         if(cla.region.toString().lowercase() == it.name.lowercase() || (cla.region.toString() == "all" && !it.name.endsWith(".zip") && !it.name.contains("_")) && !it.name.equals("Regions")) {
             File(it.toURI()).walk().forEach { path ->
@@ -89,10 +91,11 @@ fun main(args: Array<String>) {
                         }
                     }
                     val recordDate = Instant.ofEpochMilli(startTS).atZone(ZoneId.systemDefault()).toLocalDate()
+                    val recordWeekDay = recordDate.dayOfWeek.getDisplayName(TextStyle.FULL, Locale.GERMAN)
                     val recordTime = Instant.ofEpochMilli(startTS).atZone(ZoneId.systemDefault()).toLocalTime()
                     rideDuration = (BigDecimal(endTS).subtract(BigDecimal(startTS))).divide(BigDecimal(1000),2,RoundingMode.HALF_UP).divide(BigDecimal(60),2,RoundingMode.HALF_UP)
                     rideLength = rideLength.divide(BigDecimal(1000),2,RoundingMode.HALF_UP)
-                    incidentsAsCsv += "$recordDate,$recordTime,${rideLength.toPlainString()},${rideDuration.toPlainString()},$bikeType,$child,$numberOfNMI,$numberOfScaryNMI\n"
+                    incidentsAsCsv += "$recordDate,$recordWeekDay,$recordTime,${rideLength.toPlainString()},${rideDuration.toPlainString()},$bikeType,$child,$numberOfNMI,$numberOfScaryNMI\n"
                 }
             }
         }
