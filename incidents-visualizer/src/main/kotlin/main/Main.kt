@@ -32,7 +32,7 @@ fun main(args: Array<String>) {
     val incidentsInfo: MutableList<String> = mutableListOf()
     logger.info("creating " + cla.outputDir.absolutePath +  File.separator + cla.region + "-incidents.json and " + cla.outputDir.absolutePath +  File.separator + cla.region + "-incidents.html")
     File(cla.simraRoot.toURI()).walk().maxDepth(1).forEach { it ->
-        if(cla.region.toString() == it.name.lowercase() || (cla.region.toString() == "all" && !it.name.endsWith(".zip") && !it.name.contains("_")) && !it.name.equals("Regions")) {
+        if(cla.region.toString().lowercase() == it.name.lowercase() || (cla.region.toString() == "all" && !it.name.endsWith(".zip") && !it.name.contains("_")) && !it.name.equals("Regions")) {
             File(it.toURI()).walk().forEach { path ->
                 if(path.isFile && path.toString().contains("Rides") && path.name.startsWith("VM2_")) {
                     val thisIncidentsInfo: MutableList<String> = getIncidents(path.absolutePath)
@@ -58,12 +58,20 @@ fun printGeoJson(incidents: MutableList<String>, outputDir: File, region: String
             val parser = CSVParserBuilder().withSeparator(',').withQuoteChar('\"').build()
             val csvReader = CSVReaderBuilder(StringReader(incidentLine)).withSkipLines(0).withCSVParser(parser).build()
             elements = csvReader.readNext().toList()
-            incidentsAsCsv += incidentLine + "\n"
         } else {
             elements = incidentLine.split(",")
-            val cleanedIncidentLine = incidentLine.replace(";komma;",",").replace(";linebreak;","\\n")
-            incidentsAsCsv += (cleanedIncidentLine + "\n")
         }
+        var quotedIncidentLine = ""
+        var commaPrefix = ""
+        elements.forEachIndexed { index, s ->
+            if (index == 18) {
+                quotedIncidentLine += commaPrefix + "\"" + (s.replace(";komma;",",").replace(";linebreak;","\\n")).trim() + "\""
+            } else {
+                quotedIncidentLine += commaPrefix + (s)
+            }
+            commaPrefix = ","
+        }
+        incidentsAsCsv += (quotedIncidentLine + "\n")
 
         val point = Point((elements[1]).toDouble(),(elements[0]).toDouble())
         val propertiesMap = mutableMapOf<String,String>()
@@ -84,8 +92,7 @@ fun printGeoJson(incidents: MutableList<String>, outputDir: File, region: String
             }
         }
         val scary = if (elements[17] == "1") "Ja" else "Nein"
-        val desc = elements[18].replace(";komma;",",").replace(";linebreak;","\\n")
-
+        val desc = "\""+ elements[18].replace(";komma;",",").replace(";linebreak;","\\n").trim() + "\""
         participantsText += if (elements[19] == "1") (prefix + participants[9]) else ""
 
         val thisRegion = if (elements.size > 20) {
