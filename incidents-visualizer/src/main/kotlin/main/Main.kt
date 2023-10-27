@@ -69,12 +69,20 @@ fun printGeoJson(incidents: MutableList<String>, rides: MutableMap<String, Mutab
             val parser = CSVParserBuilder().withSeparator(',').withQuoteChar('\"').build()
             val csvReader = CSVReaderBuilder(StringReader(incidentLine)).withSkipLines(0).withCSVParser(parser).build()
             elements = csvReader.readNext().toList()
-            incidentsAsCsv += incidentLine + "\n"
         } else {
             elements = incidentLine.split(",")
-            val cleanedIncidentLine = incidentLine.replace(";komma;",",").replace(";linebreak;","\\n")
-            incidentsAsCsv += (cleanedIncidentLine + "\n")
         }
+        var quotedIncidentLine = ""
+        var commaPrefix = ""
+        elements.forEachIndexed { index, s ->
+            if (index == 18) {
+                quotedIncidentLine += commaPrefix + "\"" + (s.replace(";komma;",",").replace(";linebreak;","\\n")).trim() + "\""
+            } else {
+                quotedIncidentLine += commaPrefix + (s)
+            }
+            commaPrefix = ","
+        }
+        incidentsAsCsv += (quotedIncidentLine + "\n")
 
         val point = Point((elements[1]).toDouble(),(elements[0]).toDouble())
         val propertiesMap = mutableMapOf<String,String>()
@@ -95,8 +103,7 @@ fun printGeoJson(incidents: MutableList<String>, rides: MutableMap<String, Mutab
             }
         }
         val scary = if (elements[17] == "1") "Ja" else "Nein"
-        val desc = elements[18].replace(";komma;",",").replace(";linebreak;","\\n")
-
+        val desc = "\""+ elements[18].replace(";komma;",",").replace(";linebreak;","\\n").trim() + "\""
         participantsText += if (elements[19] == "1") (prefix + participants[9]) else ""
 
         val thisRegion = if (elements.size > 20) {

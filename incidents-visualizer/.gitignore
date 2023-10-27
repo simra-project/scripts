@@ -10,6 +10,7 @@ build
 
 data
 data_new
+output_data
 
 out/
 *.iws
